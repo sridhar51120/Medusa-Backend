@@ -19,7 +19,7 @@ switch (process.env.NODE_ENV) {
 
 try {
   dotenv.config({ path: process.cwd() + "/" + ENV_FILE_NAME });
-} catch (e) {}
+} catch (e) { }
 
 // CORS when consuming Medusa from admin
 const ADMIN_CORS =
@@ -52,10 +52,62 @@ const plugins = [
       },
     },
   },
+  {
+    resolve: `medusa-plugin-meilisearch`,
+    options: {
+      // other options...
+      settings: {
+        products: {
+          indexSettings: {
+            searchableAttributes: [
+              "title",
+              "description",
+              "variant_sku",
+            ],
+            displayedAttributes: [
+              "id",
+              "title",
+              "description",
+              "variant_sku",
+              "thumbnail",
+              "handle",
+            ],
+          },
+          primaryKey: "id",
+        },
+      },
+    },
+  },
+  // {
+  //   resolve: `medusa-plugin-sendgrid`,
+  //   options: {
+  //     api_key: process.env.SENDGRID_API_KEY,
+  //     from: process.env.SENDGRID_FROM,
+  //     order_placed_template: 
+  //       process.env.SENDGRID_ORDER_PLACED_ID,
+  //     localization: {
+  //       "de-DE": { // locale key
+  //         order_placed_template:
+  //           process.env.SENDGRID_ORDER_PLACED_ID_LOCALIZED,
+  //       },
+  //     },
+  //   },
+  // },
+  {
+    resolve: `medusa-plugin-twilio-sms`,
+    options: {
+      account_sid: process.env.TWILIO_SMS_ACCOUNT_SID,
+      auth_token: process.env.TWILIO_SMS_AUTH_TOKEN,
+      from_number: process.env.TWILIO_SMS_FROM_NUMBER,
+    },
+  },
+
+
 ];
 
+
 const modules = {
-  /*eventBus: {
+  eventBus: {
     resolve: "@medusajs/event-bus-redis",
     options: {
       redisUrl: REDIS_URL
@@ -66,7 +118,7 @@ const modules = {
     options: {
       redisUrl: REDIS_URL
     }
-  },*/
+  },
 };
 
 /** @type {import('@medusajs/medusa').ConfigModule["projectConfig"]} */
@@ -80,9 +132,41 @@ const projectConfig = {
   // redis_url: REDIS_URL
 };
 
+
+
 /** @type {import('@medusajs/medusa').ConfigModule} */
 module.exports = {
   projectConfig,
   plugins,
   modules,
 };
+
+module.exports = {
+  projectConfig: {
+    redis_url: process.env.REDIS_URL ||
+      "redis://localhost:6379",
+    redis_prefix: process.env.REDIS_PREFIX ||
+      "medusa:",
+    redis_options: {
+      connectionName: process.env.REDIS_CONNECTION_NAME ||
+        "medusa",
+    },
+    session_options: {
+      name: process.env.SESSION_NAME ||
+        "custom",
+    },
+    http_compression: {
+      enabled: true,
+      level: 6,
+      memLevel: 8,
+      threshold: 1024,
+    },
+    jobs_batch_size: 100,
+    jobs_max_attempts: 3,
+    jobs_retry_delay: 1000,
+    jobs_ttl: 1000 * 60 * 60 * 24 * 30,
+
+  },
+}
+
+
