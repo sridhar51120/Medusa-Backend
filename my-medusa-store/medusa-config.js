@@ -23,19 +23,21 @@ try {
 
 // CORS when consuming Medusa from admin
 const ADMIN_CORS =
-  process.env.ADMIN_CORS || "http://localhost:7000,http://localhost:7001";
+  process.env.ADMIN_CORS || "http://localhost:7000,http://localhost:7001,http://localhost:9000";
 
 // CORS to avoid issues when consuming Medusa from a client
-const STORE_CORS = process.env.STORE_CORS || "http://localhost:8000";
+const STORE_CORS = process.env.STORE_CORS || "http://localhost:8000,http://localhost:5173";
 
 const DATABASE_URL =
   process.env.DATABASE_URL || "postgres://localhost/medusa-starter-default";
 
-const REDIS_URL = process.env.REDIS_URL || "redis://localhost:6379";
+// const REDIS_URL = process.env.REDIS_URL || "redis-13905.c330.asia-south1-1.gce.cloud.redislabs.com:13905";
+
 
 const plugins = [
   `medusa-fulfillment-manual`,
   `medusa-payment-manual`,
+  `medusa-plugin-meilisearch`,
   {
     resolve: `@medusajs/file-local`,
     options: {
@@ -56,6 +58,8 @@ const plugins = [
     resolve: `medusa-plugin-meilisearch`,
     options: {
       // other options...
+      apiKey: process.env.MEILISEARCH_API_KEY,
+      host: process.env.MEILISEARCH_HOST,
       settings: {
         products: {
           indexSettings: {
@@ -78,21 +82,6 @@ const plugins = [
       },
     },
   },
-  // {
-  //   resolve: `medusa-plugin-sendgrid`,
-  //   options: {
-  //     api_key: process.env.SENDGRID_API_KEY,
-  //     from: process.env.SENDGRID_FROM,
-  //     order_placed_template: 
-  //       process.env.SENDGRID_ORDER_PLACED_ID,
-  //     localization: {
-  //       "de-DE": { // locale key
-  //         order_placed_template:
-  //           process.env.SENDGRID_ORDER_PLACED_ID_LOCALIZED,
-  //       },
-  //     },
-  //   },
-  // },
   {
     resolve: `medusa-plugin-twilio-sms`,
     options: {
@@ -101,24 +90,23 @@ const plugins = [
       from_number: process.env.TWILIO_SMS_FROM_NUMBER,
     },
   },
-
-
 ];
 
 
 const modules = {
-  eventBus: {
-    resolve: "@medusajs/event-bus-redis",
-    options: {
-      redisUrl: REDIS_URL
-    }
-  },
-  cacheService: {
-    resolve: "@medusajs/cache-redis",
-    options: {
-      redisUrl: REDIS_URL
-    }
-  },
+  // eventBus: {
+  //   resolve: "@medusajs/event-bus-redis",
+  //   options: {
+  //     redisUrl: REDIS_URL
+  //   }
+  // },
+  // cacheService: {
+  //   resolve: "@medusajs/cache-redis",
+  //   options: { 
+  //     redisUrl: process.env.CACHE_REDIS_URL,
+  //     ttl: 30,
+  //   },
+  // },
 };
 
 /** @type {import('@medusajs/medusa').ConfigModule["projectConfig"]} */
@@ -141,32 +129,32 @@ module.exports = {
   modules,
 };
 
-module.exports = {
-  projectConfig: {
-    redis_url: process.env.REDIS_URL ||
-      "redis://localhost:6379",
-    redis_prefix: process.env.REDIS_PREFIX ||
-      "medusa:",
-    redis_options: {
-      connectionName: process.env.REDIS_CONNECTION_NAME ||
-        "medusa",
-    },
-    session_options: {
-      name: process.env.SESSION_NAME ||
-        "custom",
-    },
-    http_compression: {
-      enabled: true,
-      level: 6,
-      memLevel: 8,
-      threshold: 1024,
-    },
-    jobs_batch_size: 100,
-    jobs_max_attempts: 3,
-    jobs_retry_delay: 1000,
-    jobs_ttl: 1000 * 60 * 60 * 24 * 30,
+// module.exports = {
+//   projectConfig: {
+//     redis_url: process.env.REDIS_URL ||
+//       "redis-13905.c330.asia-south1-1.gce.cloud.redislabs.com:13905",
+//     redis_prefix: process.env.REDIS_PREFIX ||
+//       "medusa:",
+//     redis_options: {
+//       connectionName: process.env.REDIS_CONNECTION_NAME ||
+//         "medusa",
+//     },
+//     session_options: {
+//       name: process.env.SESSION_NAME ||
+//         "custom",
+//     },
+//     http_compression: {
+//       enabled: true,
+//       level: 6,
+//       memLevel: 8,
+//       threshold: 1024,
+//     },
+//     jobs_batch_size: 100,
+//     jobs_max_attempts: 3,
+//     jobs_retry_delay: 1000,
+//     jobs_ttl: 1000 * 60 * 60 * 24 * 30,
 
-  },
-}
+//   },
+// }
 
 
